@@ -4,6 +4,9 @@
 #include <ccore/window.h>
 #include <ccore/opengl.h>
 #include <ccore/time.h>
+#include <ccore/file.h>
+
+#include <stdio.h>
 
 #ifdef WINDOWS
 #include <gl/GL.h>
@@ -15,6 +18,28 @@
 #define HEIGHT 32
 
 GLuint gltex;
+
+void testTTFFile(const char *file)
+{
+	unsigned int size = ccFileInfoGet(file).size;
+
+	FILE *fp = fopen(file, "rb");
+	if(!fp){
+		fprintf(stderr, "Can not open file: %s\n", file);
+		exit(1);
+	}
+
+	char *ttf = (char*)malloc(size + 1);
+	fread(ttf, 1, size, fp);
+
+	fclose(fp);
+
+	ccFont ttffont;
+	ccfTtfToFont(&ttffont, ttf, size, 8, '!', 128);
+
+	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
+	ccfGLRenderFont(&ttffont, gltex, "Test", &conf);
+}
 
 int main(int argc, char **argv)
 {
@@ -36,6 +61,8 @@ int main(int argc, char **argv)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	testTTFFile("Pixerif.ttf");
 
 	bool loop = true;
 	while(loop){
