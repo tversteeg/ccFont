@@ -20,17 +20,23 @@ extern "C" {
 #endif
 
 typedef struct {
+	int x, y;
+	int width;
+	int wraptype;
+} ccfFontConfiguration;
+
+typedef struct {
 	// Glyph parameters
-	unsigned int gwidth, gheight, gspacing;
+	unsigned int gwidth, gheight, gspacing, gstart, gnum;
 
 	unsigned int len;
 	unsigned char *bits;
 } ccfFont;
 
 void ccfPngToFont(ccfFont *font, const char *pngbin, unsigned int binlen);
-void ccfTtfToFont(ccfFont *font, const char *ttfbin, unsigned int binlen);
+void ccfTtfToFont(ccfFont *font, const char *ttfbin, unsigned int binlen, unsigned int pixelheight, int firstchar, int numchars);
 
-void ccfGLRenderFont(ccfFont *font, GLuint texture);
+void ccfGLRenderFont(ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
 
 #ifdef __cplusplus
 }
