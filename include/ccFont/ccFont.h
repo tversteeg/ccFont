@@ -27,14 +27,17 @@ typedef struct {
 
 typedef struct {
 	// Glyph parameters
-	unsigned int gwidth, gheight, gspacing, gstart, gnum;
+	unsigned gwidth, gheight, gspacing, gstart, gnum;
 
-	unsigned int len;
+	unsigned len;
 	unsigned char *bits;
 } ccfFont;
 
-void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned int binlen);
-void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned int binlen, unsigned int pixelheight, int firstchar, int numchars);
+void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen);
+// Find the matching size for a pixel font and create a ccfFont bitmap from it
+// Return codes:
+// 	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
+int ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned binlen, int firstchar, int numchars);
 
 void ccfGLRenderFont(const ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
 

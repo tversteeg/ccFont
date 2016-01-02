@@ -21,7 +21,7 @@ GLuint gltex;
 
 void testTTFFile(const char *file)
 {
-	unsigned int size = ccFileInfoGet(file).size;
+	unsigned size = ccFileInfoGet(file).size;
 
 	FILE *fp = fopen(file, "rb");
 	if(!fp){
@@ -35,7 +35,7 @@ void testTTFFile(const char *file)
 	fclose(fp);
 
 	ccfFont ttffont;
-	ccfTtfToFont(&ttffont, ttf, size, 16, '!', 128);
+	ccfTtfToFont(&ttffont, ttf, size, 'a', 32);
 
 	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
 	ccfGLRenderFont(&ttffont, gltex, "Test", &conf);
