@@ -33,10 +33,10 @@ typedef struct {
 	unsigned char *bits;
 } ccfFont;
 
-void ccfPngToFont(ccfFont *font, const char *pngbin, unsigned int binlen);
-void ccfTtfToFont(ccfFont *font, const char *ttfbin, unsigned int binlen, unsigned int pixelheight, int firstchar, int numchars);
+void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned int binlen);
+void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned int binlen, unsigned int pixelheight, int firstchar, int numchars);
 
-void ccfGLRenderFont(ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
+void ccfGLRenderFont(const ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
 
 #ifdef __cplusplus
 }

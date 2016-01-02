@@ -29,13 +29,13 @@ void testTTFFile(const char *file)
 		exit(1);
 	}
 
-	char *ttf = (char*)malloc(size + 1);
+	unsigned char *ttf = (unsigned char*)malloc(size + 1);
 	fread(ttf, 1, size, fp);
 
 	fclose(fp);
 
-	ccFont ttffont;
-	ccfTtfToFont(&ttffont, ttf, size, 8, '!', 128);
+	ccfFont ttffont;
+	ccfTtfToFont(&ttffont, ttf, size, 16, '!', 128);
 
 	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
 	ccfGLRenderFont(&ttffont, gltex, "Test", &conf);
