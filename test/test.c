@@ -15,7 +15,7 @@
 #endif
 
 #define WIDTH 400
-#define HEIGHT 32
+#define HEIGHT 200
 
 typedef struct {
 	unsigned char r;
@@ -28,6 +28,27 @@ typedef struct {
 
 GLuint gltex;
 texture_t tex;
+
+void renderTexture(texture_t tex)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindTexture(GL_TEXTURE_2D, gltex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.width, tex.height, 0, GL_RED, GL_UNSIGNED_BYTE, tex.pixels);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(-1.0f, 1.0f);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(-1.0f, -1.0f);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(1.0f, -1.0f);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(1.0f, 1.0f);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 void testTTFFile(const char *file)
 {
@@ -47,13 +68,18 @@ void testTTFFile(const char *file)
 	ccfFont ttffont;
 	int size = ccfTtfGetPixelSize(&ttffont, ttf);
 	if(size == -1){
-		fprintf(stderr, "Font %s is not a pixel font\n", file);
+		fprintf(stderr, "ccfTtfGetPixelSize failed: font %s is not a pixel font\n", file);
 		exit(1);
 	}
-	ccfTtfToFont(&ttffont, ttf, size, '!', 32);
+	ccfTtfToFont(&ttffont, ttf, size, '!', 128);
 
-	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
-	ccfGLTexBlitFont(&ttffont, "Test", &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
+	ccfFontConfiguration conf = {.x = 10, .y = 10, .width = WIDTH, .wraptype = 0};
+	int status = ccfGLTexBlitFont(&ttffont, "Hello world!", &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
+
+	if(status < 0){
+		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
+		exit(1);
+	}
 }
 
 int main(int argc, char **argv)
@@ -98,6 +124,8 @@ int main(int argc, char **argv)
 				default: break;
 			}
 		}
+
+		renderTexture(tex);
 
 		ccGLBuffersSwap();
 

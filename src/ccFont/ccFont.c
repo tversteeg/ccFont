@@ -58,31 +58,37 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned
 	font->gheight = (ymax - ymin) * scale;
 	font->gstart = firstchar;
 	font->gnum = numchars;
+	font->width = font->gwidth * numchars;
 
-	font->len = font->gwidth * font->gheight * numchars;
-	font->bits = (unsigned char*)malloc(font->len);
+	font->len = font->width * font->gheight;
+	font->bits = (unsigned char*)calloc(font->len, 1);
 
-	unsigned c, endchar = firstchar + numchars;
-	for(c = firstchar; c < endchar; c++){
+	int i;
+	for(i = 0; i < numchars; i++){
+		int c = firstchar + i;
+
 		int w, h, xoff, yoff;
 		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, c, &w, &h, &xoff, &yoff);
 
-		int startx = c * font->gwidth + xoff;
+		int startx = i * font->gwidth - xoff;
 
-		int i;
-		for (i = 0; i < h; i++) {
-			int j;
-			for (j = 0; j < w; j++){
-				font->bits[(i + yoff) * font->gwidth + j + startx] = (bitmap[i * w + j] >> 7) * 255;
+		int y;
+		for(y = 0; y < h; y++){
+			int x, yr = y - yoff;
+			for(x = 0; x < w; x++){
+				int xr = x + startx;
+				font->bits[yr * font->width + xr] = (bitmap[y * w + x] >> 7) * 255;
 			}
 		}
+
+		stbtt_FreeBitmap(bitmap, 0);
 	}
 }
 
 int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data)
 {
 	//TODO multiple formats & types, wrap around, colors
-	if(format != GL_RGB){
+	if(format != GL_RED){
 		return -1;
 	}
 	if(type != GL_UNSIGNED_BYTE){
@@ -91,18 +97,22 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 
 	int i, len = strlen(string);
 	for(i = 0; i < len; i++){
+		if(string[i] == ' '){
+			continue;
+		}
 		int c = string[i] - font->gstart;
 		if(c < 0 || c > font->gnum){
 			return -3;
 		}
 
-		int xstart = c * font->gwidth;
-		int xend = xstart + font->gwidth;
+		int xtstart = config->x + i * font->gwidth;
+		int xfstart = c * font->gwidth;
 		int y;
 		for(y = 0; y < font->gheight; y++){
 			int x;
-			for(x = xstart; x < xend; x++){
-				((unsigned char*)data)[(config->y + y) * width +  x + config->x] |= font->bits[y * font->gwidth + x];
+			for(x = 0; x < font->gwidth; x++){
+				unsigned char *target = (unsigned char*)data + (config->y + y) * width + x + xtstart;
+				*target = font->bits[y * font->width + x + xfstart];
 			}
 		}
 	}

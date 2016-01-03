@@ -30,6 +30,7 @@ typedef struct {
 	// Glyph parameters
 	unsigned gwidth, gheight, gstart, gnum;
 
+	unsigned width;
 	unsigned len;
 	unsigned char *bits;
 } ccfFont;
