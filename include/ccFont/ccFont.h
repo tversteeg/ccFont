@@ -33,6 +33,8 @@ typedef struct {
 	unsigned char *bits;
 } ccfFont;
 
+void ccfFreeFont(ccfFont *font);
+
 void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen);
 // Find the correct aliased size for a pixel font
 // Return codes:

@@ -4,6 +4,11 @@
 #define STBTT_STATIC
 #include "stb_truetype.h"
 
+void ccfFreeFont(ccfFont *font)
+{
+	free(font->bits);
+}
+
 void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen)
 {
 
@@ -52,19 +57,23 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, int firs
 	font->gwidth = (xmax - xmin) * scale;
 	font->gheight = (ymax - ymin) * scale;
 
+	font->len = font->gwidth * font->gheight * numchars;
+	font->bits = (unsigned char*)malloc(font->len);
+
 	int c, endchar = firstchar + numchars;
 	for(c = firstchar; c < endchar; c++){
-		int w, h;
-		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, c, &w, &h, 0, 0);
+		int w, h, xoff, yoff;
+		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, c, &w, &h, &xoff, &yoff);
+
+		int startx = c * font->gwidth + xoff;
+		int starty = c * font->gheight + yoff;
 
 		int j, i;
-		for (j=0; j < h; ++j) {
-			for (i=0; i < w; ++i){
-				putchar(" .:ioVM@"[bitmap[j*w+i]>>5]);
+		for (i = 0; i < h; i++) {
+			for (j = 0; j < w; j++){
+				font->bits[(i + starty) * font->gwidth + j + startx] = bitmap[i * w + j] >> 7;
 			}
-			putchar('\n');
 		}
-		putchar('\n');
 	}
 }
 
