@@ -9,28 +9,27 @@ void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen)
 
 }
 
-int ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned binlen, int firstchar, int numchars)
+int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin)
 {
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
 
 	// Find matching pixel height for font
 	int pixelheight = 2;
+	char isaliased = 1;
 	float scale;
-	char isaliased;
 	do{
 		pixelheight++;
 		scale = stbtt_ScaleForPixelHeight(&stfont, pixelheight);
 
 		int w, h;
-		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, 'w', &w, &h, 0, 0);
+		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, 'A', &w, &h, 0, 0);
 
 		isaliased = 1;
 		int i, len = w * h;
 		for(i = 0; i < len; i++){
 			if(bitmap[i] > 0 && bitmap[i] < 255){
 				isaliased = 0;
-				printf("%f\n", scale);
 				break;
 			}
 		}
@@ -40,8 +39,21 @@ int ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned binlen, in
 		return -1;
 	}
 
+	return pixelheight;
+}
+	
+void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, int firstchar, int numchars){
+	stbtt_fontinfo stfont;
+	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
+
+	int xmin, ymin, xmax, ymax;
+	stbtt_GetFontBoundingBox(&stfont, &xmin, &ymin, &xmax, &ymax);
+	float scale = stbtt_ScaleForPixelHeight(&stfont, size);
+	font->gwidth = (xmax - xmin) * scale;
+	font->gheight = (ymax - ymin) * scale;
+
 	int c, endchar = firstchar + numchars;
-	for(c = 0; c < endchar; c++){
+	for(c = firstchar; c < endchar; c++){
 		int w, h;
 		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, c, &w, &h, 0, 0);
 
@@ -54,8 +66,6 @@ int ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned binlen, in
 		}
 		putchar('\n');
 	}
-	
-	return 0;
 }
 
 void ccfGLRenderFont(const ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config)

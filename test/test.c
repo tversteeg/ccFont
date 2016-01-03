@@ -21,7 +21,7 @@ GLuint gltex;
 
 void testTTFFile(const char *file)
 {
-	unsigned size = ccFileInfoGet(file).size;
+	unsigned flen = ccFileInfoGet(file).size;
 
 	FILE *fp = fopen(file, "rb");
 	if(!fp){
@@ -29,13 +29,18 @@ void testTTFFile(const char *file)
 		exit(1);
 	}
 
-	unsigned char *ttf = (unsigned char*)malloc(size + 1);
-	fread(ttf, 1, size, fp);
+	unsigned char *ttf = (unsigned char*)malloc(flen + 1);
+	fread(ttf, 1, flen, fp);
 
 	fclose(fp);
 
 	ccfFont ttffont;
-	ccfTtfToFont(&ttffont, ttf, size, 'a', 32);
+	int size = ccfTtfGetPixelSize(&ttffont, ttf);
+	if(size == -1){
+		fprintf(stderr, "Font %s is not a pixel font\n", file);
+		exit(1);
+	}
+	ccfTtfToFont(&ttffont, ttf, size, '!', 32);
 
 	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
 	ccfGLRenderFont(&ttffont, gltex, "Test", &conf);

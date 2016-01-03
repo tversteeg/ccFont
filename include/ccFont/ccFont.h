@@ -34,10 +34,12 @@ typedef struct {
 } ccfFont;
 
 void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen);
-// Find the matching size for a pixel font and create a ccfFont bitmap from it
+// Find the correct aliased size for a pixel font
 // Return codes:
 // 	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
-int ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, unsigned binlen, int firstchar, int numchars);
+int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin);
+// Create a bitmap font from a TTF font
+void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, int firstchar, int numchars);
 
 void ccfGLRenderFont(const ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
 
