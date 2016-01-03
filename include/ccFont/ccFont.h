@@ -23,11 +23,12 @@ typedef struct {
 	int x, y;
 	int width;
 	int wraptype;
+	float color[4];
 } ccfFontConfiguration;
 
 typedef struct {
 	// Glyph parameters
-	unsigned gwidth, gheight, gspacing, gstart, gnum;
+	unsigned gwidth, gheight, gstart, gnum;
 
 	unsigned len;
 	unsigned char *bits;
@@ -41,9 +42,14 @@ void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen);
 // 	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
 int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin);
 // Create a bitmap font from a TTF font
-void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, int firstchar, int numchars);
+void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned firstchar, unsigned numchars);
 
-void ccfGLRenderFont(const ccfFont *font, GLuint targettex, const char *string, ccfFontConfiguration *config);
+// Blit a texture to a OpenGL style texture, last parameters are the same as in glTexImage2D
+// Return codes:
+// 	-1	Format is not supported (yet)
+// 	-2	Type is not supported (yet)
+// 	-3	Glyph is not in bitmap
+int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
 
 #ifdef __cplusplus
 }

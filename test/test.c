@@ -17,7 +17,17 @@
 #define WIDTH 400
 #define HEIGHT 32
 
+typedef struct {
+	unsigned char r;
+} pixel_t;
+
+typedef struct {
+	unsigned int width, height;
+	pixel_t *pixels;
+} texture_t;
+
 GLuint gltex;
+texture_t tex;
 
 void testTTFFile(const char *file)
 {
@@ -43,7 +53,7 @@ void testTTFFile(const char *file)
 	ccfTtfToFont(&ttffont, ttf, size, '!', 32);
 
 	ccfFontConfiguration conf = {.x = 0, .y = 0, .width = WIDTH, .wraptype = 0};
-	ccfGLRenderFont(&ttffont, gltex, "Test", &conf);
+	ccfGLTexBlitFont(&ttffont, "Test", &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
 }
 
 int main(int argc, char **argv)
@@ -67,6 +77,9 @@ int main(int argc, char **argv)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	tex.width = WIDTH;
+	tex.height = HEIGHT;
+	tex.pixels = (pixel_t*)malloc(tex.width * tex.height * sizeof(pixel_t));
 	testTTFFile("Pixerif.ttf");
 
 	bool loop = true;
