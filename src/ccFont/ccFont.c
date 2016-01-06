@@ -46,8 +46,9 @@ int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin)
 
 	return pixelheight;
 }
-	
-void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned firstchar, unsigned numchars){
+
+void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned firstchar, unsigned numchars)
+{
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
 
@@ -63,18 +64,25 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned
 	font->len = font->width * font->gheight;
 	font->bits = (unsigned char*)calloc(font->len, 1);
 
+	int ascent;
+	stbtt_GetFontVMetrics(&stfont, &ascent,0,0);
+	int baseline = ascent * scale;
+
 	int i;
 	for(i = 0; i < numchars; i++){
 		int c = firstchar + i;
 
+		int x0, y0, x1, y1;
+		stbtt_GetCodepointBitmapBoxSubpixel(&stfont, c, scale, scale, 0, 0, &x0, &y0, &x1, &y1);
 		int w, h, xoff, yoff;
 		unsigned char *bitmap = stbtt_GetCodepointBitmap(&stfont, 0, scale, c, &w, &h, &xoff, &yoff);
 
-		int startx = i * font->gwidth - xoff;
+		int starty = baseline + y0;
+		int startx = i * font->gwidth + xoff;
 
 		int y;
 		for(y = 0; y < h; y++){
-			int x, yr = y - yoff;
+			int x, yr = y + starty;
 			for(x = 0; x < w; x++){
 				int xr = x + startx;
 				font->bits[yr * font->width + xr] = (bitmap[y * w + x] >> 7) * 255;
