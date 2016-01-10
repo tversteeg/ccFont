@@ -15,7 +15,7 @@
 #endif
 
 #define WIDTH 400
-#define HEIGHT 200
+#define HEIGHT 50
 
 typedef struct {
 	unsigned char r;
@@ -50,6 +50,16 @@ void renderTexture(texture_t tex)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void blitText(ccfFont *font, const char *text, int x, int y)
+{
+	ccfFontConfiguration conf = {.x = x, .y = y, .width = WIDTH, .wraptype = 0};
+	int status = ccfGLTexBlitFont(font, text, &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
+	if(status < 0){
+		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
+		exit(1);
+	}
+}
+
 void testTTFFile(const char *file)
 {
 	unsigned flen = ccFileInfoGet(file).size;
@@ -73,13 +83,9 @@ void testTTFFile(const char *file)
 	}
 	ccfTtfToFont(&ttffont, ttf, size, '!', 128);
 
-	ccfFontConfiguration conf = {.x = 10, .y = 10, .width = WIDTH, .wraptype = 0};
-	int status = ccfGLTexBlitFont(&ttffont, "Hello world!", &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
-
-	if(status < 0){
-		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
-		exit(1);
-	}
+	blitText(&ttffont, "ABCDEFGHIJKLMOPQRSTUVWXYZ", 5, 0);
+	blitText(&ttffont, "abcdefghijklmopqrstuvwxyz", 5, 15);
+	blitText(&ttffont, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
 }
 
 int main(int argc, char **argv)

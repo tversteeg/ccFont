@@ -65,7 +65,7 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned
 	font->bits = (unsigned char*)calloc(font->len, 1);
 
 	int ascent;
-	stbtt_GetFontVMetrics(&stfont, &ascent,0,0);
+	stbtt_GetFontVMetrics(&stfont, &ascent, 0, 0);
 	int baseline = ascent * scale;
 
 	int i;
