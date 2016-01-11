@@ -95,13 +95,7 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned
 
 int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data)
 {
-	//TODO multiple formats & types, wrap around, colors
-	if(format != GL_RED && format != GL_RGB){
-		return -1;
-	}
-	if(type != GL_UNSIGNED_BYTE){
-		return -2;
-	}
+	//TODO wrap around
 
 	// Horrible macro magic to make sure there is no 'if' inside the while loop
 #define _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC, _CCF_PIXEL_TYPE) \
@@ -183,6 +177,13 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 		case GL_BGRA: \
 			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGRA, _CCF_PIXEL_TYPE); \
 			break; \
+	}
+
+	if(format != GL_RED && format != GL_RG && format != GL_RGB && format != GL_RGBA && format != GL_BGR && format != GL_BGRA){
+		return -1;
+	}
+	if(type != GL_UNSIGNED_BYTE && type != GL_BYTE && type != GL_UNSIGNED_SHORT && type != GL_SHORT && type != GL_UNSIGNED_INT && type != GL_INT && type != GL_FLOAT){
+		return -2;
 	}
 
 	switch(type){
