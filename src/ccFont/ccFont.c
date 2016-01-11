@@ -133,7 +133,7 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 	*target = font->bits[y * font->width + x + xfstart] * config->color[0];
 
 #define _CCF_PIXEL_FUNC_RG(_CCF_PIXEL_TYPE) \
-	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 2; \
 	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
 	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1];
 
@@ -144,7 +144,7 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[2];
 
 #define _CCF_PIXEL_FUNC_RGBA(_CCF_PIXEL_TYPE) \
-	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 4; \
 	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
 	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
 	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[2]; \
@@ -157,7 +157,7 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[0];
 
 #define _CCF_PIXEL_FUNC_BGRA(_CCF_PIXEL_TYPE) \
-	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 4; \
 	*target = font->bits[y * font->width + x + xfstart] * config->color[2]; \
 	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
 	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[0]; \
