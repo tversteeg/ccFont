@@ -1,21 +1,21 @@
-Source: ccfont
+Source: libccfont
 Priority: optional
 Maintainer: Thomas Versteeg <thomasversteeg@gmx.com>
 Build-Depends: debhelper (>= 9), scons
 Standards-Version: 3.9.6
 Section: libs
 Homepage: http://github.com/tversteeg/ccFont
-#Vcs-Git: git://anonscm.debian.org/collab-maint/ccfont.git
-#Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/ccfont.git;a=summary
+#Vcs-Git: git://anonscm.debian.org/collab-maint/libccfont.git
+#Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/libccfont.git;a=summary
 
-Package: ccfont-dev
+Package: libccfont-dev
 Section: libdevel
 Architecture: any
-Depends: ccfont (= ${binary:Version}), ${misc:Depends}
+Depends: libccfont (= ${binary:Version}), ${misc:Depends}, libglu1-mesa-dev
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
 
-Package: ccfont
+Package: libccfont
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>

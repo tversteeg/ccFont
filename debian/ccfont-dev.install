@@ -1,2 +1,0 @@
-include/ccFont/*.h usr/include/ccFont/*.h
-lib/lib*.a usr/lib/*/lib*.a
