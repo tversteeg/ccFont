@@ -96,33 +96,58 @@ void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned
 int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data)
 {
 	//TODO multiple formats & types, wrap around, colors
-	if(format != GL_RED){
+	if(format != GL_RED && format != GL_RGB){
 		return -1;
 	}
 	if(type != GL_UNSIGNED_BYTE){
 		return -2;
 	}
 
-	int i, len = strlen(string);
-	for(i = 0; i < len; i++){
-		if(string[i] == ' '){
-			continue;
-		}
-		int c = string[i] - font->gstart;
-		if(c < 0 || c > font->gnum){
-			return -3;
-		}
+	// Horrible macro magic to make sure there is no 'if' inside the while loop
+#define _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC) \
+	{\
+	int i, len = strlen(string); \
+	for(i = 0; i < len; i++){ \
+		if(string[i] == ' '){ \
+			continue; \
+		} \
+		int c = string[i] - font->gstart; \
+		if(c < 0 || c > font->gnum){ \
+			return -3; \
+		} \
+		\
+		int xtstart = config->x + i * font->gwidth; \
+		int xfstart = c * font->gwidth; \
+		int y; \
+		for(y = 0; y < font->gheight; y++){ \
+			int x; \
+			for(x = 0; x < font->gwidth; x++){ \
+				_CCF_PIXEL_FUNC(); \
+			} \
+		} \
+	} \
+	}
 
-		int xtstart = config->x + i * font->gwidth;
-		int xfstart = c * font->gwidth;
-		int y;
-		for(y = 0; y < font->gheight; y++){
-			int x;
-			for(x = 0; x < font->gwidth; x++){
-				unsigned char *target = (unsigned char*)data + (config->y + y) * width + x + xtstart;
-				*target = font->bits[y * font->width + x + xfstart];
+#define _CCF_PIXEL_FUNC_UCHAR_RED() \
+	unsigned char *target = (unsigned char*)data + (config->y + y) * width + x + xtstart; \
+	*target = font->bits[y * font->width + x + xfstart];
+
+#define _CCF_PIXEL_FUNC_UCHAR_RGB() \
+	unsigned char *target = (unsigned char*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
+	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[2];
+
+	switch(type){
+		case GL_UNSIGNED_BYTE:
+			switch(format){
+				case GL_RED:
+					_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_UCHAR_RED);
+					break;
+				case GL_RGB:
+					_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_UCHAR_RGB);
+					break;
 			}
-		}
 	}
 
 	return 0;

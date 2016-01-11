@@ -17,8 +17,11 @@
 #define WIDTH 400
 #define HEIGHT 50
 
+#define TEST_FORMAT GL_RGB
+#define TEST_TYPE GL_UNSIGNED_BYTE
+
 typedef struct {
-	unsigned char r;
+	unsigned char r, g, b;
 } pixel_t;
 
 typedef struct {
@@ -34,7 +37,7 @@ void renderTexture(texture_t tex)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, gltex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.width, tex.height, 0, GL_RED, GL_UNSIGNED_BYTE, tex.pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.width, tex.height, 0, TEST_FORMAT, TEST_TYPE, tex.pixels);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
@@ -52,8 +55,8 @@ void renderTexture(texture_t tex)
 
 void blitText(ccfFont *font, const char *text, int x, int y)
 {
-	ccfFontConfiguration conf = {.x = x, .y = y, .width = WIDTH, .wraptype = 0};
-	int status = ccfGLTexBlitFont(font, text, &conf, tex.width, tex.height, GL_RED, GL_UNSIGNED_BYTE, (void*)tex.pixels);
+	ccfFontConfiguration conf = {.x = x, .y = y, .width = WIDTH, .wraptype = 0, .color = {1.0, 1.0, 0.0}};
+	int status = ccfGLTexBlitFont(font, text, &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
 	if(status < 0){
 		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
 		exit(1);
