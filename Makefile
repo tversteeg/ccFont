@@ -6,8 +6,11 @@ TESTDIR=test
 
 CC=gcc
 RM=rm -f
+AR=ar rcs
 CFLAGS=-O3 -Iinclude/
 LDLIBS=-lGL -lGLU -lGLEW -lm
+TESTCFLAGS=-g -Wall -DCC_USE_ALL
+TESTLDLIBS=-lccore -lX11 -lXrandr -lXinerama -lXi -lpthread
 
 SRCS=$(shell find $(SOURCEDIR) -name '*.c')
 OBJS=$(subst .c,.o,$(SRCS))
@@ -15,11 +18,11 @@ OBJS=$(subst .c,.o,$(SRCS))
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	ar rcs $(LIBDIR)/lib$(NAME).a
+	$(AR) $(LIBDIR)/lib$(NAME).a
 
 test: SRCS += $(shell find $(TESTDIR) -name '*.c')
-test: CFLAGS += -g -Wall -DCC_USE_ALL
-test: LDLIBS += -lccore -lX11 -lXrandr -lXinerama -lXi -lpthread
+test: CFLAGS += $(TESTCFLAGS)
+test: LDLIBS += $(TESTLDLIBS)
 OBJS=$(subst .c,.o,$(SRCS))
 
 test: $(OBJS)
@@ -28,7 +31,7 @@ test: $(OBJS)
 depend: .depend
 
 .depend: $(SRCS)
-	rm -f ./.depend
+	$(RM) ./.depend
 	$(CC) $(CFLAGS) -MM $^>>./.depend;
 
 clean:
@@ -37,7 +40,7 @@ clean:
 	$(RM) -r $(DESTDIR)/usr/lib/lib$(NAME).a
 
 dist-clean: clean
-	rm -f *~ .depend
+	$(RM) *~ .depend
 
 install:
 	mkdir -p $(DESTDIR)/usr/include
