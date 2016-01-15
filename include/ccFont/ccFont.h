@@ -15,6 +15,8 @@
 #include <GL/glew.h>
 #endif
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,28 +30,39 @@ typedef struct {
 
 typedef struct {
 	// Glyph parameters
-	unsigned gwidth, gheight, gstart, gnum;
+	uint8_t gwidth, gheight, gstart, gnum;
 
-	unsigned width;
-	unsigned len;
-	unsigned char *bits;
+	uint32_t width, len;
+	uint8_t *bits;
 } ccfFont;
 
 void ccfFreeFont(ccfFont *font);
 
-void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen);
-// Find the correct aliased size for a pixel font
-// Return codes:
-// 	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
-int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin);
-// Create a bitmap font from a TTF font
-void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned firstchar, unsigned numchars);
+/* Get the binary format of the font for saving
+Returns the size of the binary format, or 0 when it failed
+*/
+size_t ccfFontToBin(ccfFont *font, uint8_t **fontbin);
 
-// Blit a texture to a OpenGL style texture, last parameters are the same as in glTexImage2D
-// Return codes:
-// 	-1	Format is not supported (yet)
-// 	-2	Type is not supported (yet)
-// 	-3	Glyph is not in bitmap
+// Create font from a binary format as supplied by ccfFontToBin
+void ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen);
+
+void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen);
+
+/* Find the correct aliased size for a pixel font
+Return codes:
+	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
+*/
+int ccfTtfGetPixelSize(ccfFont *font, const void *ttfbin);
+
+// Create a bitmap font from a TTF font
+void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars);
+
+/* Blit a texture to a OpenGL style texture, last parameters are the same as in glTexImage2D
+Return codes:
+	-1	Format is not supported (yet)
+	-2	Type is not supported (yet)
+	-3	Glyph is not in bitmap
+*/
 int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
 
 #ifdef __cplusplus

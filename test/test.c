@@ -89,6 +89,18 @@ void testTTFFile(const char *file)
 	blitText(&ttffont, "ABCDEFGHIJKLMOPQRSTUVWXYZ", 5, 0);
 	blitText(&ttffont, "abcdefghijklmopqrstuvwxyz", 5, 15);
 	blitText(&ttffont, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
+
+	uint8_t *bin;
+	size_t len = ccfFontToBin(&ttffont, &bin);
+
+	fp = fopen("font.ccf", "wb");
+	if(!fp){
+		fprintf(stderr, "Can not create file: font.ccf\n");
+		exit(1);
+	}
+
+	fwrite(bin, 1, len, fp);
+	fclose(fp);
 }
 
 int main(int argc, char **argv)

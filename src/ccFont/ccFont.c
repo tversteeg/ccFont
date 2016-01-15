@@ -4,17 +4,63 @@
 #define STBTT_STATIC
 #include "stb_truetype.h"
 
+static inline uint8_t boolToByte(uint8_t *b, size_t len)
+{
+	uint8_t c = 0;
+	int i;
+	for(i = 0; i < len; ++i){
+		if (b[i]){
+			c |= 1 << i;
+		}
+	}
+	return c;
+}
+
 void ccfFreeFont(ccfFont *font)
 {
 	free(font->bits);
 }
 
-void ccfPngToFont(ccfFont *font, const unsigned char *pngbin, unsigned binlen)
+#define UNPACK32TO8ARR(T, b, c, i) \
+	c[i] = (T)(b >> 24); c[i + 1] = (T)(b >> 16); c[i + 2] = (T)(b >> 8); c[i + 3] = (T)b;
+size_t ccfFontToBin(ccfFont *font, uint8_t **fontbin)
+{
+	size_t len = font->len >> 3;
+	uint8_t reminder = font->len % 8;
+	size_t totallen = len + (reminder > 0) + 13;
+
+	*fontbin = (uint8_t*)calloc(1, totallen);
+	*fontbin[0] = 1; // Version
+	*fontbin[1] = font->gwidth;
+	*fontbin[2] = font->gheight;
+	*fontbin[3] = font->gstart;
+	*fontbin[4] = font->gnum;
+	UNPACK32TO8ARR(uint8_t, font->width, *fontbin, 5);
+	UNPACK32TO8ARR(uint8_t, font->len, *fontbin, 9);
+
+	size_t i;
+	for(i = 0; i < len; i++){
+		*fontbin[i + 13] = boolToByte(font->bits + i * 8, 8);
+	}
+
+	if(reminder > 0){
+		*fontbin[len + 14] = boolToByte(font->bits + len * 8, reminder);
+	}
+
+	return totallen;
+}
+
+void ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen)
 {
 
 }
 
-int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin)
+void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen)
+{
+
+}
+
+int ccfTtfGetPixelSize(ccfFont *font, const void *ttfbin)
 {
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
@@ -47,7 +93,7 @@ int ccfTtfGetPixelSize(ccfFont *font, const unsigned char *ttfbin)
 	return pixelheight;
 }
 
-void ccfTtfToFont(ccfFont *font, const unsigned char *ttfbin, int size, unsigned firstchar, unsigned numchars)
+void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars)
 {
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
@@ -100,26 +146,26 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 	// Horrible macro magic to make sure there is no 'if' inside the while loop
 #define _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC, _CCF_PIXEL_TYPE) \
 	{\
-	int i, len = strlen(string); \
-	for(i = 0; i < len; i++){ \
-		if(string[i] == ' '){ \
-			continue; \
-		} \
-		int c = string[i] - font->gstart; \
-		if(c < 0 || c > font->gnum){ \
-			return -3; \
-		} \
-		\
-		int xtstart = config->x + i * font->gwidth; \
-		int xfstart = c * font->gwidth; \
-		int y; \
-		for(y = 0; y < font->gheight; y++){ \
-			int x; \
-			for(x = 0; x < font->gwidth; x++){ \
-				_CCF_PIXEL_FUNC(_CCF_PIXEL_TYPE); \
+		int i, len = strlen(string); \
+		for(i = 0; i < len; i++){ \
+			if(string[i] == ' '){ \
+				continue; \
+			} \
+			int c = string[i] - font->gstart; \
+			if(c < 0 || c > font->gnum){ \
+				return -3; \
+			} \
+			\
+			int xtstart = config->x + i * font->gwidth; \
+			int xfstart = c * font->gwidth; \
+			int y; \
+			for(y = 0; y < font->gheight; y++){ \
+				int x; \
+				for(x = 0; x < font->gwidth; x++){ \
+					_CCF_PIXEL_FUNC(_CCF_PIXEL_TYPE); \
+				} \
 			} \
 		} \
-	} \
 	}
 
 #define _CCF_PIXEL_FUNC_RED(_CCF_PIXEL_TYPE) \
@@ -160,23 +206,23 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 #define _CCF_SWITCH_FORMATS(_CCF_PIXEL_TYPE) \
 	switch(format){ \
 		case GL_RED: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RED, _CCF_PIXEL_TYPE); \
-			break; \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RED, _CCF_PIXEL_TYPE); \
+		break; \
 		case GL_RG: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RG, _CCF_PIXEL_TYPE); \
-			break; \
+								_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RG, _CCF_PIXEL_TYPE); \
+		break; \
 		case GL_RGB: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGB, _CCF_PIXEL_TYPE); \
-			break; \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGB, _CCF_PIXEL_TYPE); \
+		break; \
 		case GL_RGBA: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGBA, _CCF_PIXEL_TYPE); \
-			break; \
+									_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGBA, _CCF_PIXEL_TYPE); \
+		break; \
 		case GL_BGR: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGR, _CCF_PIXEL_TYPE); \
-			break; \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGR, _CCF_PIXEL_TYPE); \
+		break; \
 		case GL_BGRA: \
-			_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGRA, _CCF_PIXEL_TYPE); \
-			break; \
+									_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGRA, _CCF_PIXEL_TYPE); \
+		break; \
 	}
 
 	if(format != GL_RED && format != GL_RG && format != GL_RGB && format != GL_RGBA && format != GL_BGR && format != GL_BGRA){
