@@ -22,35 +22,38 @@ void ccfFreeFont(ccfFont *font)
 }
 
 #define UNPACK32TO8ARR(T, b, c, i) \
-	c[i] = (T)(b >> 24); c[i + 1] = (T)(b >> 16); c[i + 2] = (T)(b >> 8); c[i + 3] = (T)b;
-size_t ccfFontToBin(ccfFont *font, uint8_t **fontbin)
+	(c)[i] = (T)(b >> 24); (c)[i + 1] = (T)(b >> 16); (c)[i + 2] = (T)(b >> 8); (c)[i + 3] = (T)b;
+size_t ccfFontToBin(ccfFont *font, uint8_t *(*fontbin))
 {
 	size_t len = font->len >> 3;
 	uint8_t reminder = font->len % 8;
-	size_t totallen = len + (reminder > 0) + 13;
+	size_t totallen = 13 + len;
+	if(reminder > 0){
+		totallen++;
+	}
 
-	*fontbin = (uint8_t*)calloc(1, totallen);
-	*fontbin[0] = 1; // Version
-	*fontbin[1] = font->gwidth;
-	*fontbin[2] = font->gheight;
-	*fontbin[3] = font->gstart;
-	*fontbin[4] = font->gnum;
+	(*fontbin) = (uint8_t*)calloc(1, totallen);
+	(*fontbin)[0] = 1; // Version
+	(*fontbin)[1] = font->gwidth;
+	(*fontbin)[2] = font->gheight;
+	(*fontbin)[3] = font->gstart;
+	(*fontbin)[4] = font->gnum;
 	UNPACK32TO8ARR(uint8_t, font->width, *fontbin, 5);
 	UNPACK32TO8ARR(uint8_t, font->len, *fontbin, 9);
 
 	size_t i;
 	for(i = 0; i < len; i++){
-		*fontbin[i + 13] = boolToByte(font->bits + i * 8, 8);
+		(*fontbin)[i + 13] = boolToByte(font->bits + i * 8, 8);
 	}
 
 	if(reminder > 0){
-		*fontbin[len + 14] = boolToByte(font->bits + len * 8, reminder);
+		(*fontbin)[len + 14] = boolToByte(font->bits + len * 8, reminder);
 	}
 
 	return totallen;
 }
 
-void ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen)
+void ccfBinToFont(ccfFont *font, const void (*fontbin), size_t binlen)
 {
 
 }
