@@ -3,4 +3,4 @@ Font utilities for ccore, contains a C library and a command line interface to c
 
 Screenshot:
 
-![ccfconv](http://i.imgur.com/wetHaDq.png)
+![ccfconv](http://imgur.com/MdO1tz5)
