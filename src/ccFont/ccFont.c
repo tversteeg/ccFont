@@ -83,11 +83,11 @@ int ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen)
 
 	size_t i;
 	for(i = 0; i < len; i++){
-		byteToBools(bin[i], font->bits + i * 8, 8);
+		byteToBools(bin[i + 13], font->bits + i * 8, 8);
 	}
 
 	if(reminder > 0){
-		byteToBools(bin[i], font->bits + i * 8, reminder);
+		byteToBools(bin[len + 13], font->bits + i * 8, reminder);
 	}
 
 	return 0;
