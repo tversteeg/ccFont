@@ -5,7 +5,9 @@ NAME=ccFont
 SOURCEDIR=src/$(NAME)
 LIBDIR=lib
 INCDIR=include
+BINDIR=bin
 TESTDIR=test
+UTILDIR=utils
 
 RM=rm -f
 AR=ar rcs
@@ -25,7 +27,7 @@ $(NAME): $(OBJS)
 
 .PHONY: test
 test: $(NAME)
-	@(cd $(TESTDIR); $(MAKE) INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
+	@(cd $(TESTDIR); $(MAKE) BINDIR="$(MAKEFILEDIR)$(BINDIR)" INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
 
 .PHONY: clean
 clean:
