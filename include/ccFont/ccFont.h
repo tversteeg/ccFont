@@ -43,8 +43,11 @@ Returns the size of the binary format, or 0 when it failed
 */
 size_t ccfFontToBin(ccfFont *font, uint8_t **fontbin);
 
-// Create font from a binary format as supplied by ccfFontToBin
-void ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen);
+/* Create font from a binary format as supplied by ccfFontToBin
+Return codes:
+	-1 Font version not supported
+*/
+int ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen);
 
 void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen);
 
@@ -52,7 +55,7 @@ void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen);
 Return codes:
 	-1	Font is not a pixel font, could not find right scale without anti aliasing artifacts
 */
-int ccfTtfGetPixelSize(ccfFont *font, const void *ttfbin);
+int ccfTtfGetPixelSize(const void *ttfbin);
 
 // Create a bitmap font from a TTF font
 void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars);

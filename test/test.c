@@ -78,29 +78,24 @@ void testTTFFile(const char *file)
 
 	fclose(fp);
 
-	ccfFont ttffont;
-	int size = ccfTtfGetPixelSize(&ttffont, ttf);
+	int size = ccfTtfGetPixelSize(ttf);
 	if(size == -1){
 		fprintf(stderr, "ccfTtfGetPixelSize failed: font %s is not a pixel font\n", file);
 		exit(1);
 	}
+	ccfFont ttffont;
 	ccfTtfToFont(&ttffont, ttf, size, '!', 128);
+
+	uint8_t *bin;
+	size_t len = ccfFontToBin(&ttffont, &bin);
+	if(ccfBinToFont(&ttffont, bin, len) == -1){
+		fprintf(stderr, "Binary font failed: invalid version\n");
+		exit(1);
+	}
 
 	blitText(&ttffont, "ABCDEFGHIJKLMOPQRSTUVWXYZ", 5, 0);
 	blitText(&ttffont, "abcdefghijklmopqrstuvwxyz", 5, 15);
 	blitText(&ttffont, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
-
-	uint8_t *bin;
-	size_t len = ccfFontToBin(&ttffont, &bin);
-
-	fp = fopen("font.ccf", "wb");
-	if(!fp){
-		fprintf(stderr, "Can not create file: font.ccf\n");
-		exit(1);
-	}
-
-	fwrite(bin, 1, len, fp);
-	fclose(fp);
 }
 
 int main(int argc, char **argv)

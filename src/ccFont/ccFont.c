@@ -4,16 +4,24 @@
 #define STBTT_STATIC
 #include "stb_truetype.h"
 
-static inline uint8_t boolToByte(uint8_t *b, size_t len)
+static inline uint8_t boolToByte(const uint8_t *b, size_t len)
 {
 	uint8_t c = 0;
 	int i;
-	for(i = 0; i < len; ++i){
-		if (b[i]){
+	for(i = 0; i < len; i++){
+		if(b[i]){
 			c |= 1 << i;
 		}
 	}
 	return c;
+}
+
+static inline void byteToBools(uint8_t byte, uint8_t *b, size_t len)
+{
+	int i;
+	for(i = 0; i < len; i++){
+		b[i] = ((byte >> i) & 1) << 7;
+	}
 }
 
 void ccfFreeFont(ccfFont *font)
@@ -21,9 +29,9 @@ void ccfFreeFont(ccfFont *font)
 	free(font->bits);
 }
 
-#define UNPACK32TO8ARR(T, b, c, i) \
+#define _CCF_UNPACK32TO8(T, b, c, i) \
 	(c)[i] = (T)(b >> 24); (c)[i + 1] = (T)(b >> 16); (c)[i + 2] = (T)(b >> 8); (c)[i + 3] = (T)b;
-size_t ccfFontToBin(ccfFont *font, uint8_t *(*fontbin))
+size_t ccfFontToBin(ccfFont *font, uint8_t **fontbin)
 {
 	size_t len = font->len >> 3;
 	uint8_t reminder = font->len % 8;
@@ -38,8 +46,8 @@ size_t ccfFontToBin(ccfFont *font, uint8_t *(*fontbin))
 	(*fontbin)[2] = font->gheight;
 	(*fontbin)[3] = font->gstart;
 	(*fontbin)[4] = font->gnum;
-	UNPACK32TO8ARR(uint8_t, font->width, *fontbin, 5);
-	UNPACK32TO8ARR(uint8_t, font->len, *fontbin, 9);
+	_CCF_UNPACK32TO8(uint8_t, font->width, *fontbin, 5);
+	_CCF_UNPACK32TO8(uint8_t, font->len, *fontbin, 9);
 
 	size_t i;
 	for(i = 0; i < len; i++){
@@ -53,9 +61,36 @@ size_t ccfFontToBin(ccfFont *font, uint8_t *(*fontbin))
 	return totallen;
 }
 
-void ccfBinToFont(ccfFont *font, const void (*fontbin), size_t binlen)
+#define _CCF_PACK8TO32(b, c, i) \
+	b = (c[i] << 24) | (c[i + 1] << 16) | (c[i + 2] << 8) | c[i + 3];
+int ccfBinToFont(ccfFont *font, const void *fontbin, size_t binlen)
 {
+	uint8_t *bin = (uint8_t*)fontbin;
+	if(bin[0] != 1){
+		return -1;
+	}
+	font->gwidth = bin[1];
+	font->gheight = bin[2];
+	font->gstart = bin[3];
+	font->gnum = bin[4];
+	_CCF_PACK8TO32(font->width, bin, 5);
+	_CCF_PACK8TO32(font->len, bin, 9);
 
+	font->bits = (uint8_t*)malloc(font->len);
+
+	size_t len = font->len >> 3;
+	uint8_t reminder = font->len % 8;
+
+	size_t i;
+	for(i = 0; i < len; i++){
+		byteToBools(bin[i], font->bits + i * 8, 8);
+	}
+
+	if(reminder > 0){
+		byteToBools(bin[i], font->bits + i * 8, reminder);
+	}
+
+	return 0;
 }
 
 void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen)
@@ -63,7 +98,7 @@ void ccfPngToFont(ccfFont *font, const void *pngbin, size_t binlen)
 
 }
 
-int ccfTtfGetPixelSize(ccfFont *font, const void *ttfbin)
+int ccfTtfGetPixelSize(const void *ttfbin)
 {
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
