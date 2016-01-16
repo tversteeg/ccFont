@@ -15,7 +15,7 @@ all: $(NAME)
 $(NAME): $(OBJS) .depend
 	@(mkdir -p $(BINDIR))
 	$(CC) $(LDFLAGS) -o $(BINDIR)/$(NAME) $(OBJS) $(LDLIBS)
-	@($(BINDIR)/$(NAME))
+#	@($(BINDIR)/$(NAME))
 
 .PHONY: clean
 clean:

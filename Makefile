@@ -44,6 +44,7 @@ install:
 	cp -R $(INCDIR)/* $(DESTDIR)/usr/include
 	mkdir -p $(DESTDIR)/usr/lib
 	cp -R $(LIBDIR)/* $(DESTDIR)/usr/lib
+	@(cd $(UTILDIR); $(MAKE) install BINDIR="$(MAKEFILEDIR)$(BINDIR)" INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
 
 .PHONY: dist-clean
 dist-clean: clean

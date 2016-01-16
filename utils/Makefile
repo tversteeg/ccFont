@@ -19,6 +19,11 @@ $(NAME): $(OBJS) .depend
 .PHONY: clean
 clean:
 	$(RM) $(OBJS)
+	
+.PHONY: install
+install:
+	mkdir -p $(DESTDIR)/usr/bin
+	cp $(BINDIR)/$(NAME) $(DESTDIR)/usr/bin
 
 .PHONY: dist-clean
 dist-clean: clean

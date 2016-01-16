@@ -34,7 +34,7 @@ void convertTTFFile()
 
 	FILE *fp = fopen(source, "rb");
 	if(!fp){
-		fprintf(stderr, "Can not open file: %s\n", source);
+		fprintf(stderr, "Can not open file: \"%s\"\n", source);
 		exit(1);
 	}
 
@@ -45,7 +45,7 @@ void convertTTFFile()
 
 	int size = ccfTtfGetPixelSize(ttf);
 	if(size == -1){
-		fprintf(stderr, "ccfTtfGetPixelSize failed: font %s is not a pixel font\n", source);
+		fprintf(stderr, "ccfTtfGetPixelSize failed: font \"%s\" is not a pixel font\n", source);
 		exit(1);
 	}
 
@@ -57,7 +57,7 @@ void convertTTFFile()
 
 	fp = fopen(target, "wb");
 	if(!fp){
-		fprintf(stderr, "Can not create file: %s\n", target);
+		fprintf(stderr, "Can not create file: \"%s\"\n", target);
 		exit(1);
 	}
 
@@ -97,14 +97,6 @@ int main(int argc, char **argv)
 				sourcetype = 't';
 				strcpy(source, optarg);
 				break;
-			case 0: 
-				printf("option %s", opts[index].name);
-				if (optarg){
-					printf(" with arg %s", optarg);
-				}
-				printf("\n");
-				break;
-
 			default:
 				return 1;
 		}
