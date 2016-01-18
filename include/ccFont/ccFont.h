@@ -66,7 +66,7 @@ Return codes:
 	-2	Type is not supported (yet)
 	-3	Glyph is not in bitmap
 */
-int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
+int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
 
 #ifdef __cplusplus
 }

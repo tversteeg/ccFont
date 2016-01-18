@@ -177,7 +177,7 @@ void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstcha
 	}
 }
 
-int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data)
+int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data)
 {
 	//TODO wrap around
 
@@ -262,6 +262,58 @@ int ccfGLTexBlitFont(const ccfFont *font, const char *string, const ccfFontConfi
 									_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGRA, _CCF_PIXEL_TYPE); \
 		break; \
 	}
+
+	if(format != GL_RED && format != GL_RG && format != GL_RGB && format != GL_RGBA && format != GL_BGR && format != GL_BGRA){
+		return -1;
+	}
+	if(type != GL_UNSIGNED_BYTE && type != GL_BYTE && type != GL_UNSIGNED_SHORT && type != GL_SHORT && type != GL_UNSIGNED_INT && type != GL_INT && type != GL_FLOAT){
+		return -2;
+	}
+
+	switch(type){
+		case GL_UNSIGNED_BYTE:
+			_CCF_SWITCH_FORMATS(unsigned char);
+			break;
+		case GL_BYTE:
+			_CCF_SWITCH_FORMATS(char);
+			break;
+		case GL_UNSIGNED_SHORT:
+			_CCF_SWITCH_FORMATS(unsigned short);
+			break;
+		case GL_SHORT:
+			_CCF_SWITCH_FORMATS(short);
+			break;
+		case GL_UNSIGNED_INT:
+			_CCF_SWITCH_FORMATS(unsigned int);
+			break;
+		case GL_INT:
+			_CCF_SWITCH_FORMATS(int);
+			break;
+		case GL_FLOAT:
+			_CCF_SWITCH_FORMATS(float);
+			break;
+	}
+
+#undef _CCF_LOOP_PIXELS
+
+	return 0;
+}
+
+int ccfGLTexBlitChar(const ccfFont *font, char c, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data) 
+{
+	// Horrible macro magic to make sure there is no 'if' inside the while loop
+#define _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC, _CCF_PIXEL_TYPE) \
+{\
+	int xtstart = config->x; \
+	int xfstart = c * font->gwidth; \
+	int y; \
+	for(y = 0; y < font->gheight; y++){ \
+		int x; \
+		for(x = 0; x < font->gwidth; x++){ \
+			_CCF_PIXEL_FUNC(_CCF_PIXEL_TYPE); \
+		} \
+	}\
+}
 
 	if(format != GL_RED && format != GL_RG && format != GL_RGB && format != GL_RGBA && format != GL_BGR && format != GL_BGRA){
 		return -1;

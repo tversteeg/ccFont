@@ -56,7 +56,7 @@ void renderTexture(texture_t tex)
 void blitText(ccfFont *font, const char *text, int x, int y)
 {
 	ccfFontConfiguration conf = {.x = x, .y = y, .width = WIDTH, .wraptype = 0, .color = {1.0, 1.0, 0.0}};
-	int status = ccfGLTexBlitFont(font, text, &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
+	int status = ccfGLTexBlitText(font, text, &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
 	if(status < 0){
 		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
 		exit(1);
