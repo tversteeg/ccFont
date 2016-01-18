@@ -58,7 +58,15 @@ void blitText(ccfFont *font, const char *text, int x, int y)
 	ccfFontConfiguration conf = {.x = x, .y = y, .width = WIDTH, .wraptype = 0, .color = {1.0, 1.0, 0.0}};
 	int status = ccfGLTexBlitText(font, text, &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
 	if(status < 0){
-		fprintf(stderr, "ccfGLTexBlitFont failed with status code: %d\n", status);
+		fprintf(stderr, "ccfGLTexBlitText failed with status code: %d\n", status);
+		exit(1);
+	}
+	conf.color[0] = 0.0;
+	conf.color[1] = 1.0;
+	conf.color[2] = 1.0;
+	status = ccfGLTexBlitChar(font, 'B', &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
+	if(status < 0){
+		fprintf(stderr, "ccfGLTexBlitChar failed with status code: %d\n", status);
 		exit(1);
 	}
 }

@@ -295,15 +295,25 @@ int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfi
 	}
 
 #undef _CCF_LOOP_PIXELS
+#undef _CCF_PIXEL_FUNC_RED
+#undef _CCF_PIXEL_FUNC_RG
+#undef _CCF_PIXEL_FUNC_RGB
+#undef _CCF_PIXEL_FUNC_RGBA
+#undef _CCF_PIXEL_FUNC_BGR
+#undef _CCF_PIXEL_FUNC_BGRA
+#undef _CCF_SWITCH_FORMATS
 
 	return 0;
 }
 
-int ccfGLTexBlitChar(const ccfFont *font, char c, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data) 
+int ccfGLTexBlitChar(const ccfFont *font, char ch, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data) 
 {
-	// Horrible macro magic to make sure there is no 'if' inside the while loop
 #define _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC, _CCF_PIXEL_TYPE) \
 {\
+	int c = ch - font->gstart; \
+	if(c < 0 || c > font->gnum){ \
+		return -3; \
+	} \
 	int xtstart = config->x; \
 	int xfstart = c * font->gwidth; \
 	int y; \
@@ -314,6 +324,63 @@ int ccfGLTexBlitChar(const ccfFont *font, char c, const ccfFontConfiguration *co
 		} \
 	}\
 }
+
+#define _CCF_PIXEL_FUNC_RED(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + (config->y + y) * width + x + xtstart; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[0];
+
+#define _CCF_PIXEL_FUNC_RG(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 2; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1];
+
+#define _CCF_PIXEL_FUNC_RGB(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
+	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[2];
+
+#define _CCF_PIXEL_FUNC_RGBA(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 4; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[0]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
+	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[2]; \
+	*(target + 3) = font->bits[y * font->width + x + xfstart] * config->color[3];
+
+#define _CCF_PIXEL_FUNC_BGR(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 3; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[2]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
+	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[0];
+
+#define _CCF_PIXEL_FUNC_BGRA(_CCF_PIXEL_TYPE) \
+	_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + ((config->y + y) * width + x + xtstart) * 4; \
+	*target = font->bits[y * font->width + x + xfstart] * config->color[2]; \
+	*(target + 1) = font->bits[y * font->width + x + xfstart] * config->color[1]; \
+	*(target + 2) = font->bits[y * font->width + x + xfstart] * config->color[0]; \
+	*(target + 3) = font->bits[y * font->width + x + xfstart] * config->color[3];
+
+#define _CCF_SWITCH_FORMATS(_CCF_PIXEL_TYPE) \
+	switch(format){ \
+		case GL_RED: \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RED, _CCF_PIXEL_TYPE); \
+		break; \
+		case GL_RG: \
+								_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RG, _CCF_PIXEL_TYPE); \
+		break; \
+		case GL_RGB: \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGB, _CCF_PIXEL_TYPE); \
+		break; \
+		case GL_RGBA: \
+									_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_RGBA, _CCF_PIXEL_TYPE); \
+		break; \
+		case GL_BGR: \
+								 _CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGR, _CCF_PIXEL_TYPE); \
+		break; \
+		case GL_BGRA: \
+									_CCF_LOOP_PIXELS(_CCF_PIXEL_FUNC_BGRA, _CCF_PIXEL_TYPE); \
+		break; \
+	}
 
 	if(format != GL_RED && format != GL_RG && format != GL_RGB && format != GL_RGBA && format != GL_BGR && format != GL_BGRA){
 		return -1;
