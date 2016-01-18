@@ -68,6 +68,9 @@ Return codes:
 */
 int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
 
+// Same as ccfGLTexBlitText, only for one character
+int ccfGLTexBlitChar(const ccfFont *font, char c, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
+
 #ifdef __cplusplus
 }
 #endif
