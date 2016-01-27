@@ -71,6 +71,9 @@ int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfi
 // Same as ccfGLTexBlitText, only for one character
 int ccfGLTexBlitChar(const ccfFont *font, char c, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
 
+// Render a rectangle the size of a character
+int ccfGLTexBlitBlock(const ccfFont *font, const ccfFontConfiguration *config, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *data);
+
 #ifdef __cplusplus
 }
 #endif
