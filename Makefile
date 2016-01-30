@@ -1,54 +1,75 @@
-# Generic makefile for static libraries
+# Generic makefile for libraries
 
+# Custom variables
 NAME=ccFont
+VERSIONMAYOR=1
 
-SOURCEDIR=src/$(NAME)
+SOURCEDIR:=src/$(NAME)
 LIBDIR=lib
-INCDIR=include
 BINDIR=bin
+INCDIR=include
 TESTDIR=test
 UTILDIR=utils
 
+CFLAGS:=-I$(INCDIR) -g -fPIC -O3 -DCC_USE_ALL
+LDLIBS=-lm
+SRCS:=$(wildcard ./$(SOURCEDIR)/*.c)
+
+# Generated
+OBJS:=$(subst .c,.o,$(SRCS))
+MAKEFILEDIR:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
+DLIBNAME:=lib$(NAME).so
+DLIBFILE:=$(LIBDIR)/$(DLIBNAME)
+SLIBNAME:=lib$(NAME).a
+SLIBFILE:=$(LIBDIR)/$(SLIBNAME)
+ILIBDIR:=$(DESTDIR)/usr/lib
+ILIBFILE:=$(ILIBDIR)/$(DLIBNAME)
+IINCDIR:=$(DESTDIR)/usr/include
+
+DYNAR:=$(CC) $(LDFLAGS) -g -shared -Wl,-soname,$(DLIBNAME).$(VERSIONMAYOR) $(LDLIBS) -o
+STATAR=ar rcs
 RM=rm -f
-AR=ar rcs
-CFLAGS=-I$(INCDIR) -O3 -DCC_USE_ALL
-LDLIBS=-lGL -lGLU -lGLEW -lm
 
-SRCS=$(wildcard ./$(SOURCEDIR)/*.c)
-OBJS=$(subst .c,.o,$(SRCS))
-LIBFILE=lib$(NAME).a
-MAKEFILEDIR=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+all: $(DLIBFILE).$(VERSIONMAYOR) $(SLIBFILE) utils
 
-all: $(NAME)
+$(SLIBFILE): $(OBJS)
+	@mkdir -p $(LIBDIR)
+	$(STATAR) $(SLIBFILE) $(OBJS)
 
-.PHONY: $(NAME)
-$(NAME): $(OBJS)
-	$(AR) $(LIBDIR)/lib$(NAME).a $(OBJS)
+$(DLIBFILE).$(VERSIONMAYOR) $(DLIBFILE): $(OBJS)
+	@mkdir -p $(LIBDIR)
+	$(DYNAR) $(DLIBFILE).$(VERSIONMAYOR) $(OBJS)
+	ln -sf $(abspath $(DLIBFILE).$(VERSIONMAYOR)) $(DLIBFILE)
 
 .PHONY: test
-test: $(NAME)
-	@(cd $(TESTDIR); $(MAKE) BINDIR="$(MAKEFILEDIR)$(BINDIR)" INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
+test: $(DLIBFILE).$(VERSIONMAYOR)
+	@(cd $(TESTDIR); $(MAKE) INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
 
 .PHONY: utils
-utils: $(NAME)
+utils: $(DLIBFILE).$(VERSIONMAYOR)
 	@(cd $(UTILDIR); $(MAKE) BINDIR="$(MAKEFILEDIR)$(BINDIR)" INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
 
 .PHONY: clean
 clean:
-	find $(SOURCEDIR) -type f -name '*.o' -delete
-	$(RM) $(LIBDIR)/$(LIBFILE)
+	$(RM) $(OBJS) $(DLIBFILE).$(VERSIONMAYOR) $(DLIBFILE)
+	@(cd $(TESTDIR); $(MAKE) clean)
+	@(cd $(UTILDIR); $(MAKE) clean)
 
 .PHONY: install
 install:
-	mkdir -p $(DESTDIR)/usr/include
-	cp -R $(INCDIR)/* $(DESTDIR)/usr/include
-	mkdir -p $(DESTDIR)/usr/lib
-	cp -R $(LIBDIR)/* $(DESTDIR)/usr/lib
-	@(cd $(UTILDIR); $(MAKE) install BINDIR="$(MAKEFILEDIR)$(BINDIR)" INCDIR="$(MAKEFILEDIR)$(INCDIR)" LIBDIR="$(MAKEFILEDIR)$(LIBDIR)" LIBNAME="$(NAME)")
+	mkdir -p $(IINCDIR)
+	cp -R $(INCDIR)/* $(IINCDIR)
+	mkdir -p $(ILIBDIR)
+	cp $(SLIBFILE) $(ILIBDIR)
+	cp $(DLIBFILE).$(VERSIONMAYOR) $(ILIBDIR)
+	ln -sf $(DLIBNAME).$(VERSIONMAYOR) $(ILIBFILE)
 
 .PHONY: dist-clean
 dist-clean: clean
 	$(RM) *~ .depend
+	@(cd $(TESTDIR); $(MAKE) dist-clean)
+	@(cd $(UTILDIR); $(MAKE) dist-clean)
 
 .depend: $(SRCS)
 	$(RM) ./.depend

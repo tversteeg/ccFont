@@ -27,6 +27,5 @@ include /usr/share/dpkg/default.mk
 #	dh_auto_configure -- \
 #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
-
-
-
+override_dh_strip:
+	dh_strip -plibccfont1 --dbg-package=libccfont1-dbg
