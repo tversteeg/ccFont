@@ -20,7 +20,7 @@ static inline void byteToBools(uint8_t byte, uint8_t *b, size_t len)
 {
 	int i;
 	for(i = 0; i < len; i++){
-		b[i] = ((byte >> i) & 1) << 7;
+		b[i] = (byte >> i) & 1;
 	}
 }
 
@@ -52,7 +52,7 @@ static int _ccfBlitChar(const ccfFont *font, char ch, int x, int y, const float 
 	}
 
 #define _CCF_SET_CHANNEL(target, bit, ti, ci) \
-	target[ti] = target[ti] * (1 - bit) + color[ci] * bit;
+	target[ti] = target[ti] * (1 - bit) + color[ci] * (bit << 7);
 
 #define _CCF_LOOP_PIXELS(_CCF_PIXEL_TYPE) \
 {\
