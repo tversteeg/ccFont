@@ -297,7 +297,6 @@ int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfi
 				y += font->gheight;
 				break;
 			case ' ': 
-				x += font->gwidth;
 				break;
 			default:;
 				int err = _ccfBlitChar(font, *c, x, y, config->color, width, height, format, type, data); 
