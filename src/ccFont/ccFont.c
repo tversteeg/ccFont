@@ -48,39 +48,39 @@ static int _ccfBlitChar(const ccfFont *font, char ch, int x, int y, const float 
 			break;
 		case GL_RED: 
 			bits = 1;
-		break; 
+			break; 
 	}
 
 #define _CCF_SET_CHANNEL(target, bit, ti, ci) \
 	target[ti] = target[ti] * (1 - bit) + color[ci] * (bit << 7);
 
 #define _CCF_LOOP_PIXELS(_CCF_PIXEL_TYPE) \
-{\
-	for(int i = 0; i < font->gheight; i++){ \
-		for(int j = 0; j < font->gwidth; j++){ \
-			_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + (j + x + (i + y) * width) * bits; \
-			uint8_t bit = font->bits[xstart + j + i * font->width]; \
-			switch(format){ \
-				case GL_RGBA: \
-					_CCF_SET_CHANNEL(target, bit, 3, 3); \
-				case GL_RGB: \
-					_CCF_SET_CHANNEL(target, bit, 2, 2); \
-				case GL_RG: \
-					_CCF_SET_CHANNEL(target, bit, 1, 1); \
-				case GL_RED: \
-					_CCF_SET_CHANNEL(target, bit, 0, 0); \
+	{\
+		for(int i = 0; i < font->gheight; i++){ \
+			for(int j = 0; j < font->gwidth; j++){ \
+				_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + (j + x + (i + y) * width) * bits; \
+				uint8_t bit = font->bits[xstart + j + i * font->width]; \
+				switch(format){ \
+					case GL_RGBA: \
+												_CCF_SET_CHANNEL(target, bit, 3, 3); \
+					case GL_RGB: \
+											 _CCF_SET_CHANNEL(target, bit, 2, 2); \
+					case GL_RG: \
+											_CCF_SET_CHANNEL(target, bit, 1, 1); \
+					case GL_RED: \
+											 _CCF_SET_CHANNEL(target, bit, 0, 0); \
 					break; \
-				case GL_BGRA: \
-					_CCF_SET_CHANNEL(target, bit, 3, 3); \
-				case GL_BGR: \
-					_CCF_SET_CHANNEL(target, bit, 0, 2); \
+					case GL_BGRA: \
+												_CCF_SET_CHANNEL(target, bit, 3, 3); \
+					case GL_BGR: \
+											 _CCF_SET_CHANNEL(target, bit, 0, 2); \
 					_CCF_SET_CHANNEL(target, bit, 1, 1); \
 					_CCF_SET_CHANNEL(target, bit, 2, 0); \
-				break; \
-			}\
+					break; \
+				}\
+			} \
 		} \
-	} \
-}
+	}
 
 	switch(type){
 		case GL_UNSIGNED_BYTE:
@@ -291,15 +291,22 @@ int ccfGLTexBlitText(const ccfFont *font, const char *string, const ccfFontConfi
 	int y = config->y;
 	for(const char *c = string; *c != '\0'; c++){
 		x += font->gwidth;
-		if(*c == '\n'){
-			x = config->x;
-			y += font->gheight;
-		}
-		int err = _ccfBlitChar(font, *c, x, y, config->color, width, height, format, type, data); 
-		if(err < 0){
-			return err;
+		switch(*c){
+			case '\n': 
+				x = config->x;
+				y += font->gheight;
+				break;
+			case ' ': 
+				x += font->gwidth;
+				break;
+			default:;
+				int err = _ccfBlitChar(font, *c, x, y, config->color, width, height, format, type, data); 
+				if(err < 0){
+					return err;
+				}
+				break;
 		}
 	}
-	
+
 	return 0;
 }

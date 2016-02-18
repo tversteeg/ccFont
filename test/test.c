@@ -15,7 +15,7 @@
 #endif
 
 #define WIDTH 400
-#define HEIGHT 50
+#define HEIGHT 70
 
 #define TEST_FORMAT GL_RGB
 #define TEST_TYPE GL_UNSIGNED_BYTE
@@ -61,14 +61,6 @@ void blitText(ccfFont *font, const char *text, int x, int y)
 		fprintf(stderr, "ccfGLTexBlitText failed with status code: %d\n", status);
 		exit(1);
 	}
-	conf.color[0] = 0.0;
-	conf.color[1] = 1.0;
-	conf.color[2] = 1.0;
-	status = ccfGLTexBlitChar(font, 'B', &conf, tex.width, tex.height, TEST_FORMAT, TEST_TYPE, (void*)tex.pixels);
-	if(status < 0){
-		fprintf(stderr, "ccfGLTexBlitChar failed with status code: %d\n", status);
-		exit(1);
-	}
 }
 
 void testTTFFile(const char *file)
@@ -104,6 +96,7 @@ void testTTFFile(const char *file)
 	blitText(&ttffont, "ABCDEFGHIJKLMOPQRSTUVWXYZ", 5, 0);
 	blitText(&ttffont, "abcdefghijklmopqrstuvwxyz", 5, 15);
 	blitText(&ttffont, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
+	blitText(&ttffont, "Testing the pixel fonts!", 5, 45);
 }
 
 int main(int argc, char **argv)
