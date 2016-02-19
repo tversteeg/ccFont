@@ -19,7 +19,7 @@ void printVersion()
 
 void printHelp()
 {
-	printf("Usage:\t ccfconv [OPTION...] FILE...\n\n"
+	printf("Usage:\t ccfconv [OPTION...] [-t...|-p...|OUTPUTFILE...]\n\n"
 			"Convert to CCF binary file as specified by *FILE*:\n"
 			"\t-t,--ttf=FILE\tConvert a TTF font\n"
 			"\t-p,--png=FILE\tConvert a packed PNG texture\n\n"
@@ -102,10 +102,26 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind < argc) {
+	if(optind < argc) {
 		strcpy(target, argv[optind]);
 	}else{
-		fprintf(stderr, "No output file supplied!\n");
+		if(sourcetype == 0){
+			fprintf(stderr, "No output file supplied!\n");
+			exit(1);
+		}else{
+			strcpy(target, source);
+
+			int i = strlen(target) - 1;
+			for(; i >= 0; i--){
+				if(target[i] == '.'){
+					strcpy(target + i, ".ccf");
+					break;
+				}
+			}
+			if(i < 0){
+				strcpy(target + strlen(target), ".ccf");
+			}
+		}
 	}
 
 	switch(sourcetype){
