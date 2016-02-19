@@ -84,7 +84,7 @@ void testTTFFile(const char *file)
 		exit(1);
 	}
 	ccfFont ttffont;
-	ccfTtfToFont(&ttffont, ttf, size, '!', 128);
+	ccfTtfToFont(&ttffont, ttf, size, '!', 128, 0);
 
 	uint8_t *bin;
 	size_t len = ccfFontToBin(&ttffont, &bin);

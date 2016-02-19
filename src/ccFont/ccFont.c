@@ -218,7 +218,7 @@ int ccfTtfGetPixelSize(const void *ttfbin)
 	return pixelheight;
 }
 
-void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars)
+void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars, int offset)
 {
 	stbtt_fontinfo stfont;
 	stbtt_InitFont(&stfont, ttfbin, stbtt_GetFontOffsetForIndex(ttfbin, 0));
@@ -226,8 +226,8 @@ void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstcha
 	int xmin, ymin, xmax, ymax;
 	stbtt_GetFontBoundingBox(&stfont, &xmin, &ymin, &xmax, &ymax);
 	float scale = stbtt_ScaleForPixelHeight(&stfont, size);
-	font->gwidth = (xmax - xmin) * scale;
-	font->gheight = (ymax - ymin) * scale;
+	font->gwidth = (xmax - xmin) * scale + offset * 2;
+	font->gheight = (ymax - ymin) * scale + offset * 2;
 	font->gstart = firstchar;
 	font->gnum = numchars;
 	font->width = font->gwidth * numchars;

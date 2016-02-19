@@ -58,7 +58,7 @@ Return codes:
 int ccfTtfGetPixelSize(const void *ttfbin);
 
 // Create a bitmap font from a TTF font
-void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars);
+void ccfTtfToFont(ccfFont *font, const void *ttfbin, int size, unsigned firstchar, unsigned numchars, int offset);
 
 /* Blit a texture to a OpenGL style texture, last parameters are the same as in glTexImage2D
 Return codes:

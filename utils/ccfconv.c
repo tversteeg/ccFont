@@ -11,6 +11,7 @@
 #define CCF_VERSION_MINOR 0
 
 char source[256], target[256];
+int offset;
 
 void printVersion()
 {
@@ -23,6 +24,8 @@ void printHelp()
 			"Convert to CCF binary file as specified by *FILE*:\n"
 			"\t-t,--ttf=FILE\tConvert a TTF font\n"
 			"\t-p,--png=FILE\tConvert a packed PNG texture\n\n"
+			"Options:\n"
+			"\t-o,--offset=INT\tSet the texture packing offset, default is 0\n\n"
 			"General information:\n"
 			"\t-h,--help\tGive this help list\n"
 			"\t-v,--version\tShow the current version\n");
@@ -50,7 +53,7 @@ void convertTTFFile()
 	}
 
 	ccfFont ttffont;
-	ccfTtfToFont(&ttffont, ttf, size, '!', 128);
+	ccfTtfToFont(&ttffont, ttf, size, '!', 128, offset);
 
 	uint8_t *bin;
 	size_t len = ccfFontToBin(&ttffont, &bin);
@@ -70,15 +73,18 @@ static struct option opts[] = {
 	{"version", no_argument, 0, 'v'},
 	{"png", required_argument, 0, 'p'},
 	{"ttf", required_argument, 0, 't'},
+	{"offset", required_argument, 0, 'o'},
 	{NULL, 0, NULL, 0}
 };
 
 int main(int argc, char **argv)
 {
+	offset = 0;
+
 	char sourcetype = 0;
 	while(1){
 		int index;
-		int c = getopt_long(argc, argv, "hvp:t:", opts, &index);
+		int c = getopt_long(argc, argv, "hvp:t:o:", opts, &index);
 		if(c == -1){
 			break;
 		}
@@ -96,6 +102,9 @@ int main(int argc, char **argv)
 			case 't':
 				sourcetype = 't';
 				strcpy(source, optarg);
+				break;
+			case 'o':
+				offset = atoi(optarg);
 				break;
 			default:
 				return 1;
