@@ -14,7 +14,7 @@
 #include <GL/glew.h>
 #endif
 
-#define WIDTH 400
+#define WIDTH 500
 #define HEIGHT 70
 
 #define TEST_FORMAT GL_RGB
@@ -94,8 +94,16 @@ void testTTFFile(const char *file)
 	}
 
 	blitText(&ttffont, "ABCDEFGHIJKLMOPQRSTUVWXYZ", 5, 0);
-	blitText(&ttffont, "abcdefghijklmopqrstuvwxyz", 5, 15);
-	blitText(&ttffont, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
+
+	ccfFont ttffont2;
+	ccfTtfToFont(&ttffont2, ttf, size, '!', 128, -1);
+
+	blitText(&ttffont2, "abcdefghijklmopqrstuvwxyz", 5, 15);
+
+	ccfFont ttffont3;
+	ccfTtfToFont(&ttffont3, ttf, size, '!', 128, 1);
+	blitText(&ttffont3, "!@#$%^&*()_-+=[]{}'\";:,<.>/?", 5, 30);
+
 	blitText(&ttffont, "Testing the pixel fonts!", 5, 45);
 }
 

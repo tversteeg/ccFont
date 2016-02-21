@@ -1,5 +1,7 @@
 #include <ccFont/ccFont.h>
 
+#include <limits.h>
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #include "stb_truetype.h"
@@ -51,31 +53,25 @@ static int _ccfBlitChar(const ccfFont *font, char ch, int x, int y, const float 
 			break; 
 	}
 
-#define _CCF_SET_CHANNEL(target, bit, ti, ci) \
-	target[ti] = target[ti] * (1 - bit) + color[ci] * (bit << 7);
+#define _CCF_SET_CHANNEL(target, bit, bm, ti, ci) \
+	target[ti] = target[ti] * (1 - bit) + color[ci] * bit * bm;
 
-#define _CCF_LOOP_PIXELS(_CCF_PIXEL_TYPE) \
+#define _CCF_LOOP_PIXELS(_CCF_PIXEL_TYPE, bitmult) \
 	{\
 		for(int i = 0; i < font->gheight; i++){ \
 			for(int j = 0; j < font->gwidth; j++){ \
 				_CCF_PIXEL_TYPE *target = (_CCF_PIXEL_TYPE*)data + (j + x + (i + y) * width) * bits; \
-				uint8_t bit = font->bits[xstart + j + i * font->width]; \
+				uint8_t bit = font->bits[xstart + j + i * font->width] & 1; \
 				switch(format){ \
-					case GL_RGBA: \
-												_CCF_SET_CHANNEL(target, bit, 3, 3); \
-					case GL_RGB: \
-											 _CCF_SET_CHANNEL(target, bit, 2, 2); \
-					case GL_RG: \
-											_CCF_SET_CHANNEL(target, bit, 1, 1); \
-					case GL_RED: \
-											 _CCF_SET_CHANNEL(target, bit, 0, 0); \
+					case GL_RGBA: _CCF_SET_CHANNEL(target, bit, bitmult, 3, 3); \
+					case GL_RGB: 	_CCF_SET_CHANNEL(target, bit, bitmult, 2, 2); \
+					case GL_RG: 	_CCF_SET_CHANNEL(target, bit, bitmult, 1, 1); \
+					case GL_RED:	_CCF_SET_CHANNEL(target, bit, bitmult, 0, 0); \
 					break; \
-					case GL_BGRA: \
-												_CCF_SET_CHANNEL(target, bit, 3, 3); \
-					case GL_BGR: \
-											 _CCF_SET_CHANNEL(target, bit, 0, 2); \
-					_CCF_SET_CHANNEL(target, bit, 1, 1); \
-					_CCF_SET_CHANNEL(target, bit, 2, 0); \
+					case GL_BGRA:	_CCF_SET_CHANNEL(target, bit, bitmult, 3, 3); \
+					case GL_BGR:	_CCF_SET_CHANNEL(target, bit, bitmult, 0, 2); \
+												_CCF_SET_CHANNEL(target, bit, bitmult, 1, 1); \
+												_CCF_SET_CHANNEL(target, bit, bitmult, 2, 0); \
 					break; \
 				}\
 			} \
@@ -84,25 +80,25 @@ static int _ccfBlitChar(const ccfFont *font, char ch, int x, int y, const float 
 
 	switch(type){
 		case GL_UNSIGNED_BYTE:
-			_CCF_LOOP_PIXELS(unsigned char);
+			_CCF_LOOP_PIXELS(unsigned char, UCHAR_MAX);
 			break;
 		case GL_BYTE:
-			_CCF_LOOP_PIXELS(char);
+			_CCF_LOOP_PIXELS(char, CHAR_MAX);
 			break;
 		case GL_UNSIGNED_SHORT:
-			_CCF_LOOP_PIXELS(unsigned short);
+			_CCF_LOOP_PIXELS(unsigned short, USHRT_MAX);
 			break;
 		case GL_SHORT:
-			_CCF_LOOP_PIXELS(short);
+			_CCF_LOOP_PIXELS(short, SHRT_MAX);
 			break;
 		case GL_UNSIGNED_INT:
-			_CCF_LOOP_PIXELS(unsigned int);
+			_CCF_LOOP_PIXELS(unsigned int, UINT_MAX);
 			break;
 		case GL_INT:
-			_CCF_LOOP_PIXELS(int);
+			_CCF_LOOP_PIXELS(int, INT_MAX);
 			break;
 		case GL_FLOAT:
-			_CCF_LOOP_PIXELS(float);
+			_CCF_LOOP_PIXELS(float, 1.0f);
 			break;
 	}
 

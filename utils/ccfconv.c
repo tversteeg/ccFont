@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	printf("File \"%s\" successfully converted to \"%s\"\n", source, target);
+	printf("File \"%s\" successfully converted to \"%s\" with offset %d\n", source, target, offset);
 
 	return 0;
 }
