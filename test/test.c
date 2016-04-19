@@ -1,3 +1,13 @@
+#include <ccore/core.h>
+
+#ifdef LINUX
+
+int main(void)
+{
+	return 0;
+}
+
+#else
 #include <ccFont/ccFont.h>
 
 #include <ccore/display.h>
@@ -160,3 +170,5 @@ int main(int argc, char **argv)
 	ccFree();
 	return 0;
 }
+
+#endif
